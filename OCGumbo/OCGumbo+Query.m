@@ -51,7 +51,7 @@ NS_INLINE void add_valid_node_to_array(GumboNode *node, NSString *selector, NSMu
     }
         //attr selector ([attrName],[attrName=attrValue])
     else if ([selector hasPrefix:@"["]) {
-        NSString *attrKey = [selector substringWithRange:NSMakeRange(1, selector.length-1)];
+        NSString *attrKey = [selector substringWithRange:NSMakeRange(1, selector.length-2)];
         NSString *attrValue = nil;
         NSRange spRange = [attrKey rangeOfString:@"="];
         if (spRange.location != NSNotFound) {
@@ -101,8 +101,8 @@ NS_INLINE void add_valid_node_to_array(GumboNode *node, NSString *selector, NSMu
         } else if (attrMark != NSNotFound) {
             tag = [selector substringToIndex:attrMark];
 
-            selector = [selector substringFromIndex:idMark];
-            NSString *attrKey = [selector substringWithRange:NSMakeRange(1, selector.length-1)];
+            selector = [selector substringFromIndex:attrMark];
+            NSString *attrKey = [selector substringWithRange:NSMakeRange(1, selector.length-2)];
             NSString *attrValue = nil;
             NSRange spRange = [attrKey rangeOfString:@"="];
             if (spRange.location != NSNotFound) {

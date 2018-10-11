@@ -49,12 +49,33 @@ NS_INLINE void add_valid_node_to_array(GumboNode *node, NSString *selector, NSMu
             }
         }
     }
-    
+        //attr selector ([attrName],[attrName=attrValue])
+    else if ([selector hasPrefix:@"["]) {
+        NSString *attrKey = [selector substringWithRange:NSMakeRange(1, selector.length-1)];
+        NSString *attrValue = nil;
+        NSRange spRange = [attrKey rangeOfString:@"="];
+        if (spRange.location != NSNotFound) {
+            attrValue = [attrKey substringFromIndex:(spRange.location+spRange.length)];
+            attrKey = [attrKey substringWithRange:NSMakeRange(0, spRange.location)];
+        }
+        GumboAttribute *idAttribute = gumbo_get_attribute(&node->v.element.attributes, attrKey.UTF8String);
+        if (idAttribute) {
+            if (attrValue) {
+                const char *elementId = idAttribute->value;
+                if (!strcasecmp(elementId, [attrValue UTF8String])) {
+                    [*array addObject:OCGumboNodeCast(node)];
+                }
+            }else{
+                [*array addObject:OCGumboNodeCast(node)];
+            }
+        }
+    }
     //tag selector (p | p.clsname | p#eleId)
     else {
         NSString *tag = nil;
         NSUInteger classMark = [selector rangeOfString:@"."].location;
         NSUInteger idMark = [selector rangeOfString:@"#"].location;
+        NSUInteger attrMark = [selector rangeOfString:@"["].location;
         const char *tagname = gumbo_normalized_tagname(node->v.element.tag);
         
         if (classMark != NSNotFound) {
@@ -76,6 +97,27 @@ NS_INLINE void add_valid_node_to_array(GumboNode *node, NSString *selector, NSMu
                 !strcasecmp(tagname, [tag UTF8String]) &&
                 !strcasecmp(attrValue, [Id UTF8String])) {
                 [*array addObject:OCGumboNodeCast(node)];
+            }
+        } else if (attrMark != NSNotFound) {
+            tag = [selector substringToIndex:attrMark];
+
+            selector = [selector substringFromIndex:idMark];
+            NSString *attrKey = [selector substringWithRange:NSMakeRange(1, selector.length-1)];
+            NSString *attrValue = nil;
+            NSRange spRange = [attrKey rangeOfString:@"="];
+            if (spRange.location != NSNotFound) {
+                attrValue = [attrKey substringFromIndex:(spRange.location+spRange.length)];
+                attrKey = [attrKey substringWithRange:NSMakeRange(0, spRange.location)];
+            }
+            const char *tagAttrValue = oc_gumbo_get_attribute(node, attrKey.UTF8String);
+            if (tagAttrValue && !strcasecmp(tagname, [tag UTF8String])) {
+                if (attrValue) {
+                    if (!strcasecmp(tagAttrValue, [attrValue UTF8String])) {
+                        [*array addObject:OCGumboNodeCast(node)];
+                    }
+                }else{
+                    [*array addObject:OCGumboNodeCast(node)];
+                }
             }
         } else {
             tag = selector;

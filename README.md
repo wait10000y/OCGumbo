@@ -1,3 +1,14 @@
+
+query 查询 添加 属性查询匹配:
+
+selector ([attrName],[attrName=attrValue])
+
+NSLog(@"tag#id : %@", document.Query(@"a[href=#]")); // 查找 href属性内容为#的 所有a标签.
+NSLog(@"tag#id : %@", document.Query(@"image[alt]")); // 查找 alt属性有内容的 所有image标签.
+
+=====================================
+
+
 OCGumbo - An Objective-C HTML5 parser.
 =====================================
 
